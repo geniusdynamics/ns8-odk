@@ -1,0 +1,23 @@
+[Unit]
+Description=ODK Central central
+BindsTo=odk.service
+PartOf=odk.service
+After=odk.service postgresql-app.service pyxform-app.service enketo-app.service
+
+[Service]
+Type=notify
+NotifyAccess=all
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%E/state/environment
+WorkingDirectory=%E/state
+Restart=on-failure
+TimeoutStartSec=240
+TimeoutStopSec=75
+ExecStartPre=runagent discover-smarthost
+ExecStart=/usr/bin/podman run --replace --name central-app --pod odk --sdnotify=conmon --cgroups=no-conmon \
+    --env-file=%E/state/odk.env --env-file=%E/etc/central.env \
+    --env-file=%E/state/postgres.env --env-file=%E/state/odk-smarthost.env \
+    --volume %E/state/odk-secrets:/etc/secrets:ro,z \
+    ${ODK_SERVICE_IMAGE}
+ExecStop=/usr/bin/podman stop --ignore -t 15 central-app
+ExecStopPost=/usr/bin/podman rm --ignore -f central-app

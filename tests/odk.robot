@@ -1,0 +1,53 @@
+*** Settings ***
+Library    SSHLibrary
+
+*** Variables ***
+${TEST_HOST}    odk.ns8-ci.test
+
+*** Test Cases ***
+Install ODK Central
+    ${output}=    Run On Node    add-module ${IMAGE_URL} 1
+    ${module}=    Evaluate    json.loads($output)["module_id"]    modules=json
+    Set Suite Variable    ${module_id}    ${module}
+
+Configure the HTTPS route and administrator contact
+    Run On Node
+    ...    api-cli run module/${module_id}/configure-module --data '{"host":"${TEST_HOST}","sysadmin_email":"admin@${TEST_HOST}","lets_encrypt":false}'
+    ${output}=    Run On Node    api-cli run module/${module_id}/get-configuration --data '{}'
+    ${config}=    Evaluate    json.loads($output)    modules=json
+    Should Be Equal    ${config}[host]    ${TEST_HOST}
+    Should Be Equal    ${config}[sysadmin_email]    admin@${TEST_HOST}
+
+Serve both Central and its API through Traefik
+    ${redirect}=    Run On Node    curl -sS --resolve ${TEST_HOST}:80:127.0.0.1 -o /dev/null -w '%{redirect_url}' http://${TEST_HOST}/
+    Should Be Equal    ${redirect}    https://${TEST_HOST}/
+    ${version}=    Run On Node    curl -kfsS --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/version.txt
+    Should Match Regexp    ${version}    v[0-9]{4}[.][0-9]+[.][0-9]+
+    ${output}=    Run On Node    curl -kfsS --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/v1/config/public
+    Evaluate    json.loads($output)    modules=json
+
+Verify supporting services
+    FOR    ${unit}    postgresql    redis-main    redis-cache    pyxform    enketo    central    nginx
+        Run On Node    runagent -m ${module_id} systemctl --user is-active ${unit}-app.service
+    END
+    ${pong}=    Run On Node    runagent -m ${module_id} podman exec redis-main-app redis-cli ping
+    Should Be Equal    ${pong}    PONG
+    ${pong}=    Run On Node    runagent -m ${module_id} podman exec redis-cache-app redis-cli -p 6380 ping
+    Should Be Equal    ${pong}    PONG
+    Run On Node    runagent -m ${module_id} podman exec pyxform-app python -c 'import socket; socket.create_connection(("127.0.0.1", 8081), 5).close()'
+    Run On Node    runagent -m ${module_id} podman exec central-app nc -z 127.0.0.1 8005
+
+Export a logical database backup
+    Run On Node    runagent -m ${module_id} module-dump-state
+    Run On Node    runagent -m ${module_id} sh -ec 'test -s odk.pg_dump; podman exec -i postgresql-app pg_restore --list < odk.pg_dump'
+    Run On Node    runagent -m ${module_id} module-cleanup-state
+
+Remove the module
+    Run On Node    remove-module --no-preserve ${module_id}
+
+*** Keywords ***
+Run On Node
+    [Arguments]    ${command}
+    ${output}    ${stderr}    ${rc}=    Execute Command    ${command}    return_stderr=True    return_rc=True
+    Should Be Equal As Integers    ${rc}    0    msg=${command}\n${output}\n${stderr}
+    RETURN    ${output}

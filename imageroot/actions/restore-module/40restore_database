@@ -1,37 +1,25 @@
 #!/bin/bash
-
-#
-# Copyright (C) 2022 Nethesis S.r.l.
 # SPDX-License-Identifier: GPL-3.0-or-later
-#
+set -euo pipefail
+exec 1>&2
 
-set -e -o pipefail
-exec 1>&2 # Redirect any output to the journal (stderr)
-
-mkdir -vp restore
-cat - >restore/kickstart_restore.sh <<'EOS'
-# Read dump file from standard input:
-pg_restore --no-owner --no-privileges -U postgres -d kickstart
-ec=$?
-docker_temp_server_stop
-exit $ec
-EOS
-
-# Override the image /docker-entrypoint-initdb.d contents, to restore the
-# DB dump file. The container will be stopped at the end
-
-podman run \
-    --rm \
-    --interactive \
-    --network=none \
-    --volume=./restore:/docker-entrypoint-initdb.d/:Z \
-    --volume=postgres-data:/var/lib/postgresql/data:Z \
-    --replace --name=restore_db \
-    --env POSTGRES_USER=postgres \
-    --env POSTGRES_PASSWORD=Nethesis,1234 \
-    --env POSTGRES_DB=kickstart \
-    --env TZ=UTC \
-    "${POSTGRES_IMAGE}" < kickstart.pg_dump
-
-# If the restore is successful, clean up:
-rm -rfv restore/ kickstart.pg_dump
+test -s odk.pg_dump
+systemctl --user stop odk.service
+# Use the same named volume as the regular unit, with the network isolated.
+podman run --rm -d --replace --name odk-restore --network none \
+    --env-file ./postgres.env --env POSTGRES_USER=odk --env POSTGRES_DB=odk \
+    --volume odk-postgres:/var/lib/postgresql/data:Z \
+    "${POSTGRES_IMAGE}"
+trap 'podman stop --ignore -t 30 odk-restore' EXIT
+for ((attempt=0; attempt<60; attempt++)); do
+    if podman exec odk-restore pg_isready -h 127.0.0.1 -U odk -d postgres; then
+        break
+    fi
+    sleep 2
+done
+# Restore uses the dump as the source of truth for the destination database.
+podman exec odk-restore dropdb -h 127.0.0.1 -U odk --if-exists odk
+podman exec odk-restore createdb -h 127.0.0.1 -U odk odk
+podman exec -i odk-restore pg_restore -h 127.0.0.1 -U odk -d odk \
+    --no-owner --no-privileges --single-transaction < odk.pg_dump
+rm -f odk.pg_dump

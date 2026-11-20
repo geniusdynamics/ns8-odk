@@ -1,0 +1,18 @@
+[Unit]
+Description=ODK Central pod
+Requires=postgresql-app.service redis-main-app.service redis-cache-app.service pyxform-app.service enketo-app.service central-app.service nginx-app.service
+Before=postgresql-app.service redis-main-app.service redis-cache-app.service pyxform-app.service enketo-app.service central-app.service nginx-app.service
+
+[Service]
+Type=forking
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%E/state/environment
+Restart=on-failure
+ExecStartPre=/usr/bin/podman pod create --replace --name odk --shm-size=512m --infra-conmon-pidfile %t/odk.pid --publish 127.0.0.1:${TCP_PORT}:8080
+ExecStart=/usr/bin/podman pod start odk
+ExecStop=/usr/bin/podman pod stop --ignore -t 15 odk
+ExecStopPost=/usr/bin/podman pod rm --ignore -f odk
+PIDFile=%t/odk.pid
+
+[Install]
+WantedBy=default.target
