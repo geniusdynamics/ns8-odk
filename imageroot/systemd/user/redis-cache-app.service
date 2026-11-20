@@ -1,0 +1,19 @@
+[Unit]
+Description=ODK Central redis-cache
+BindsTo=odk.service
+PartOf=odk.service
+After=odk.service
+
+[Service]
+Type=notify
+NotifyAccess=all
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%E/state/environment
+WorkingDirectory=%E/state
+Restart=on-failure
+TimeoutStartSec=240
+TimeoutStopSec=75
+ExecStart=/usr/bin/podman run --replace --name redis-cache-app --pod odk --sdnotify=conmon --cgroups=no-conmon \
+    ${REDIS_IMAGE} redis-server --bind 127.0.0.1 --port 6380 --save ""
+ExecStop=/usr/bin/podman stop --ignore -t 15 redis-cache-app
+ExecStopPost=/usr/bin/podman rm --ignore -f redis-cache-app

@@ -1,39 +1,22 @@
-#
-# Copyright (C) 2022 Nethesis S.r.l.
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
-
 [Unit]
-Description=Podman postgresql-app.service
-BindsTo=kickstart.service
-After=kickstart.service
+Description=ODK Central postgresql
+BindsTo=odk.service
+PartOf=odk.service
+After=odk.service
 
 [Service]
+Type=notify
+NotifyAccess=all
 Environment=PODMAN_SYSTEMD_UNIT=%n
-EnvironmentFile=%S/state/environment
-# EnvironmentFile=%S/state/secrets/passwords.secret
-Restart=always
-TimeoutStopSec=70
-ExecStartPre=/bin/rm -f %t/postgresql-app.pid %t/postgresql-app.ctr-id
-ExecStartPre=/bin/mkdir -p %S/state/restore/
-ExecStart=/usr/bin/podman run --conmon-pidfile %t/postgresql-app.pid \
-    --cidfile %t/postgresql-app.ctr-id --cgroups=no-conmon \
-    --pod-id-file %t/kickstart.pod-id --replace -d --name postgresql-app \
-    --env-file=%S/state/environment \
-    --volume postgres-data:/var/lib/postgresql/data:Z \
-    --volume %S/state/restore/:/docker-entrypoint-initdb.d/:Z \
-    --env POSTGRES_USER=postgres \
-    --env POSTGRES_PASSWORD=Nethesis,1234 \
-    --env POSTGRES_DB=kickstart \
-    --env TZ=UTC \
-    ${POSTGRES_IMAGE}
-ExecStartPost=/usr/bin/bash -c "while ! podman  exec postgresql-app psql -U postgres -d kickstart ;  do sleep 5 ; done"
-ExecStop=/usr/bin/podman stop --ignore --cidfile %t/postgresql-app.ctr-id -t 10
-ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/postgresql-app.ctr-id
-ExecReload=/usr/bin/podman kill -s HUP postgresql-app
-SyslogIdentifier=%u
-PIDFile=%t/postgresql-app.pid
-Type=forking
-
-[Install]
-WantedBy=default.target
+EnvironmentFile=%E/state/environment
+WorkingDirectory=%E/state
+Restart=on-failure
+TimeoutStartSec=240
+TimeoutStopSec=75
+ExecStart=/usr/bin/podman run --replace --name postgresql-app --pod odk --sdnotify=conmon --cgroups=no-conmon \
+    --env-file=%E/state/postgres.env --env POSTGRES_USER=odk --env POSTGRES_DB=odk \
+    --volume odk-postgres:/var/lib/postgresql/data:Z \
+    ${POSTGRES_IMAGE} -c listen_addresses=127.0.0.1
+ExecStartPost=/usr/bin/timeout 90 /usr/bin/bash -c 'until podman exec postgresql-app pg_isready -h 127.0.0.1 -U odk -d odk; do sleep 2; done'
+ExecStop=/usr/bin/podman stop --ignore -t 15 postgresql-app
+ExecStopPost=/usr/bin/podman rm --ignore -f postgresql-app

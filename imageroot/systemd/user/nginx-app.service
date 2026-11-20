@@ -1,0 +1,21 @@
+[Unit]
+Description=ODK Central nginx
+BindsTo=odk.service
+PartOf=odk.service
+After=odk.service central-app.service enketo-app.service
+
+[Service]
+Type=notify
+NotifyAccess=all
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%E/state/environment
+WorkingDirectory=%E/state
+Restart=on-failure
+TimeoutStartSec=240
+TimeoutStopSec=75
+ExecStart=/usr/bin/podman run --replace --name nginx-app --pod odk --sdnotify=conmon --cgroups=no-conmon \
+    --env-file=%E/state/odk.env --env-file=%E/etc/central.env \
+    ${ODK_NGINX_IMAGE}
+ExecStartPost=/usr/bin/timeout 160 /usr/bin/bash -c 'until curl -fsS -H "Host: $(sed -n s/^DOMAIN=//p odk.env)" http://127.0.0.1:${TCP_PORT}/v1/config/public >/dev/null; do sleep 2; done'
+ExecStop=/usr/bin/podman stop --ignore -t 15 nginx-app
+ExecStopPost=/usr/bin/podman rm --ignore -f nginx-app

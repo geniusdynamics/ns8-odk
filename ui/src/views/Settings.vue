@@ -23,16 +23,25 @@
       <cv-column>
         <cv-tile light>
           <cv-form @submit.prevent="configureModule">
-            <cv-text-input
-              :label="$t('settings.kickstart_fqdn')"
-              placeholder="kickstart.example.org"
+            <NsTextInput
+              :label="$t('settings.fqdn')"
+              placeholder="odk.example.org"
               v-model.trim="host"
               class="mg-bottom"
               :invalid-message="$t(error.host)"
               :disabled="loading.getConfiguration || loading.configureModule"
               ref="host"
             >
-            </cv-text-input>
+            </NsTextInput>
+            <NsTextInput
+              v-model.trim="sysadminEmail"
+              :label="$t('settings.sysadmin_email')"
+              :helper-text="$t('settings.sysadmin_email_help')"
+              :invalid-message="$t(error.sysadmin_email)"
+              :disabled="stillLoading"
+              class="mg-bottom"
+              ref="sysadmin_email"
+            />
             <NsToggle
               value="letsEncrypt"
               :label="core.$t('apps_lets_encrypt.request_https_certificate')"
@@ -80,27 +89,6 @@
                 />
               </cv-column>
             </cv-row>
-            <cv-toggle
-              value="httpToHttps"
-              :label="$t('settings.http_to_https')"
-              v-model="isHttpToHttpsEnabled"
-              :disabled="loading.getConfiguration || loading.configureModule"
-              class="mg-bottom"
-            >
-              <template slot="text-left">{{
-                $t("settings.disabled")
-              }}</template>
-              <template slot="text-right">{{
-                $t("settings.enabled")
-              }}</template>
-            </cv-toggle>
-            <!-- advanced options -->
-            <cv-accordion ref="accordion" class="maxwidth mg-bottom">
-              <cv-accordion-item :open="toggleAccordion[0]">
-                <template slot="title">{{ $t("settings.advanced") }}</template>
-                <template slot="content"> </template>
-              </cv-accordion-item>
-            </cv-accordion>
             <cv-row v-if="error.configureModule">
               <cv-column>
                 <NsInlineNotification
@@ -191,7 +179,7 @@ export default {
       host: "",
       isLetsEncryptEnabled: false,
       isLetsEncryptCurrentlyEnabled: false,
-      isHttpToHttpsEnabled: true,
+      sysadminEmail: "",
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -202,7 +190,7 @@ export default {
         configureModule: "",
         host: "",
         lets_encrypt: "",
-        http2https: "",
+        sysadmin_email: "",
         getStatus: false,
       },
     };
@@ -324,7 +312,7 @@ export default {
       this.host = config.host;
       this.isLetsEncryptEnabled = config.lets_encrypt;
       this.isLetsEncryptCurrentlyEnabled = config.lets_encrypt;
-      this.isHttpToHttpsEnabled = config.http2https;
+      this.sysadminEmail = config.sysadmin_email;
 
       this.loading.getConfiguration = false;
       this.focusElement("host");
@@ -340,6 +328,11 @@ export default {
         if (isValidationOk) {
           this.focusElement("host");
         }
+        isValidationOk = false;
+      }
+      if (!this.sysadminEmail) {
+        this.error.sysadmin_email = "common.required";
+        if (isValidationOk) this.focusElement("sysadmin_email");
         isValidationOk = false;
       }
       return isValidationOk;
@@ -399,7 +392,7 @@ export default {
           data: {
             host: this.host,
             lets_encrypt: this.isLetsEncryptEnabled,
-            http2https: this.isHttpToHttpsEnabled,
+            sysadmin_email: this.sysadminEmail,
           },
           extra: {
             title: this.$t("settings.instance_configuration", {

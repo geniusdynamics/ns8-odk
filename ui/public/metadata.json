@@ -1,19 +1,21 @@
 {
-  "name": "kickstart",
+  "name": "ODK Central",
   "description": {
-    "en": "My kickstart module"
+    "en": "Build forms, collect online and offline field data, and manage surveys, submissions and Entity Lists with ODK Central."
   },
-  "categories": [],
+  "categories": [
+    "collaboration"
+  ],
   "authors": [
     {
-      "name": "Name Surname",
-      "email": "author@yourmail.org"
+      "name": "Genius Dynamics",
+      "email": "resources@genius-dynamics.com"
     }
   ],
   "docs": {
-    "documentation_url": "https://docs.kickstart.com/",
-    "bug_url": "https://github.com/NethServer/dev",
-    "code_url": "https://github.com/author/ns8-kickstart"
+    "documentation_url": "https://github.com/geniusdynamics/odk#readme",
+    "bug_url": "https://github.com/geniusdynamics/odk/issues",
+    "code_url": "https://github.com/geniusdynamics/odk"
   },
-  "source": "ghcr.io/nethserver/kickstart"
+  "source": "ghcr.io/geniusdynamics/odk"
 }
