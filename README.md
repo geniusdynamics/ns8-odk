@@ -38,7 +38,7 @@ Configure the **NS8 cluster smarthost** for Central's invitation and password-re
 
 ## OpenID Connect sign-in
 
-In NS8 **Settings**, enable **OpenID Connect**. Choose **NS8 provider** and select an identity provider and user domain. NS8 registers the application and its callback. For an external provider, choose **Enter an external provider** and use **Advanced manual OIDC settings**.
+In NS8 **Settings**, enable **OpenID Connect**. Under **Choose an NS8 provider**, select an identity provider and user domain. NS8 registers the application and its callback. For an external provider, choose **Enter an external provider** and use **Advanced manual OIDC settings**.
 
 For manual setup, enter the HTTPS issuer URL, client ID and client secret. Register the callback shown in Settings, `https://<Central hostname>/v1/oidc/callback`.
 
