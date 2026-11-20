@@ -1,27 +1,68 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://nethserver.org/json-schema/task/input/odk/configure-module",
-  "title": "Configure ODK Central",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "host",
-    "sysadmin_email"
-  ],
-  "properties": {
-    "host": {
-      "type": "string",
-      "format": "hostname",
-      "pattern": "^[a-zA-Z0-9.-]+\\.[a-zA-Z0-9-]+$"
-    },
-    "sysadmin_email": {
-      "type": "string",
-      "format": "email",
-      "pattern": "^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+\\.[A-Za-z0-9-]+$"
-    },
-    "lets_encrypt": {
-      "type": "boolean",
-      "description": "Request a Let's Encrypt TLS certificate"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://nethserver.org/json-schema/task/input/odk/configure-module",
+    "title": "Configure ODK Central",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "host",
+        "sysadmin_email"
+    ],
+    "properties": {
+        "host": {
+            "type": "string",
+            "format": "hostname",
+            "pattern": "^[a-zA-Z0-9.-]+\\.[a-zA-Z0-9-]+$"
+        },
+        "sysadmin_email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+\\.[A-Za-z0-9-]+$"
+        },
+        "lets_encrypt": {
+            "type": "boolean",
+            "description": "Request a Let's Encrypt TLS certificate"
+        },
+        "oidc": {
+            "type": "object",
+            "required": [
+                "enabled"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "issuer": {
+                    "type": "string",
+                    "maxLength": 2048
+                },
+                "client_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "client_secret": {
+                    "type": "string",
+                    "maxLength": 4096
+                },
+                "confirmed": {
+                    "type": "boolean"
+                },
+                "mode": {
+                    "enum": [
+                        "manual",
+                        "ns8"
+                    ]
+                },
+                "provider": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "domain": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        }
     }
-  }
 }

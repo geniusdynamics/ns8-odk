@@ -178,3 +178,7 @@ Live examples of most components: `https://nethserver.github.io/ns8-ui-lib/` (St
 **ONLY edit `ui/public/i18n/en/translation.json`.**
 All other language files (`fr/`, `it/`, `de/`, etc.) come from Weblate. Never touch them manually.
 If you add or rename a key, add/rename it in `en/translation.json` only. Do NOT create or modify any other `translation.json`.
+
+## ODK Central OpenID Connect settings
+
+Show the optional NS8 provider and user domain selector as the default OIDC configuration path. Place credentials for external providers under Advanced. Keep the saved client secret out of the UI and require acknowledgement before enabling OIDC, since enabling it replaces local browser sign-in. Show the canonical HTTPS Central callback.

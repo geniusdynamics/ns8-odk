@@ -44,6 +44,22 @@ Export a logical database backup
     Run On Node    runagent -m ${module_id} sh -ec 'test -s odk.pg_dump; podman exec -i postgresql-app pg_restore --list < odk.pg_dump'
     Run On Node    runagent -m ${module_id} module-cleanup-state
 
+
+OIDC can be enabled and disabled without exposing its secret
+    Run On Node    api-cli run module/${module_id}/configure-module --data '{"host":"${TEST_HOST}","lets_encrypt":false,"sysadmin_email":"admin@${TEST_HOST}","oidc":{"issuer":"https://idp.example.test/oidc","client_id":"ns8-ci","client_secret":"ci-example-client-secret","enabled":true,"confirmed":true}}'
+    ${output}=    Run On Node    api-cli run module/${module_id}/get-configuration
+    ${config}=    Evaluate    json.loads($output)["oidc"]    modules=json
+    Should Be True    ${config}[enabled]
+    Should Be True    ${config}[secret_configured]
+    Should Not Contain    ${output}    ci-example-client-secret
+    ${page}=    Run On Node    curl -kfsS --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/client-config.json
+    ${client}=    Evaluate    json.loads($page)["oidcEnabled"]    modules=json
+    Should Be True    ${client}
+    Run On Node    api-cli run module/${module_id}/configure-module --data '{"host":"${TEST_HOST}","lets_encrypt":false,"sysadmin_email":"admin@${TEST_HOST}","oidc":{"enabled":false}}'
+    ${page}=    Run On Node    curl -kfsS --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/client-config.json
+    ${client}=    Evaluate    json.loads($page)["oidcEnabled"]    modules=json
+    Should Not Be True    ${client}
+
 Remove the module
     Run On Node    remove-module --no-preserve ${module_id}
 

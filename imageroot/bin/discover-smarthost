@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import agent
+from oidc_config import load
 
 smtp = agent.get_smarthost_settings(agent.redis_connect(use_replica=True))
 options = {}
@@ -25,5 +26,10 @@ if smtp["enabled"]:
 os.umask(0o077)
 target = Path("odk-smarthost.env")
 temporary = target.with_suffix(".tmp")
-temporary.write_text("NODE_CONFIG=" + json.dumps({"default": {"email": {"transportOpts": options}}}) + "\n")
+defaults = {"email": {"transportOpts": options}}
+oidc = load()
+if oidc.get("enabled"):
+    defaults["oidc"] = {"enabled": True, "issuerUrl": oidc["issuer"],
+                        "clientId": oidc["client_id"], "clientSecret": oidc["client_secret"]}
+temporary.write_text("NODE_CONFIG=" + json.dumps({"default": defaults}) + "\n")
 temporary.replace(target)

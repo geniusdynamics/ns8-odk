@@ -103,3 +103,7 @@ Use this when an action needs to trigger another action of the same module.
 
 ## Testing
 Robot Framework tests in `tests/`. Run in order by filename: install → test → uninstall.
+
+## ODK Central module
+
+The module ID and image name are `odk`. The repository is `ns8-odk`. Follow the pinned upstream Central release and keep its frontend and backend versions compatible. NS8 Traefik terminates HTTPS.

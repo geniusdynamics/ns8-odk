@@ -430,3 +430,7 @@ If a script fails, execution continues with the next one — each script is inde
 
 Recommended layout: migrations first, then a restart step (`systemctl --user try-restart`, most modules name it `20restart`), then post-restart reindex or cleanup.
 Version-specific migrations go before the restart step so the new code starts on updated data.
+
+## ODK Central authentication
+
+The module uses one Central OIDC provider at a time. Keep manual and NS8-managed client secrets in `state/oidc.json` with mode 0600. Back up the file and derive container settings from it. The Central API reads its OIDC configuration through `NODE_CONFIG` alongside SMTP. The nginx frontend must have the same OIDC enabled state. Discover NS8 OIDC service providers and register the Central callback through the NS8 `register-client` action. Keep CLI calls that omit OIDC backward compatible, and never return a client secret from `get-configuration`.

@@ -1,24 +1,70 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://nethserver.org/json-schema/task/output/odk/get-configuration",
-  "title": "Read ODK Central settings",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "host",
-    "sysadmin_email",
-    "lets_encrypt"
-  ],
-  "properties": {
-    "host": {
-      "type": "string"
-    },
-    "sysadmin_email": {
-      "type": "string"
-    },
-    "lets_encrypt": {
-      "type": "boolean",
-      "description": "Request a Let's Encrypt TLS certificate"
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://nethserver.org/json-schema/task/output/odk/get-configuration",
+    "title": "Read ODK Central settings",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "host",
+        "sysadmin_email",
+        "lets_encrypt"
+    ],
+    "properties": {
+        "host": {
+            "type": "string"
+        },
+        "sysadmin_email": {
+            "type": "string"
+        },
+        "lets_encrypt": {
+            "type": "boolean",
+            "description": "Request a Let's Encrypt TLS certificate"
+        },
+        "oidc": {
+            "type": "object",
+            "required": [
+                "enabled"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "issuer": {
+                    "type": "string",
+                    "maxLength": 2048
+                },
+                "client_id": {
+                    "type": "string",
+                    "maxLength": 255
+                },
+                "secret_configured": {
+                    "type": "boolean"
+                },
+                "callback_path": {
+                    "type": "string"
+                },
+                "mode": {
+                    "enum": [
+                        "manual",
+                        "ns8"
+                    ]
+                },
+                "provider": {
+                    "type": "string",
+                    "maxLength": 128
+                },
+                "domain": {
+                    "type": "string",
+                    "maxLength": 255
+                }
+            }
+        },
+        "oidc_providers": {
+            "type": "array",
+            "items": {
+                "type": "object"
+            }
+        }
     }
-  }
 }

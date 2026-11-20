@@ -36,6 +36,20 @@ Enter the initial password at the hidden prompt, then sign in at the Central URL
 
 Configure the **NS8 cluster smarthost** for Central's invitation and password-reset email. Use a relay that accepts mail from `no-reply@<Central hostname>`. The CLI can create or reset an administrator password independently of email delivery. See the [ODK user management guide](https://docs.getodk.org/central-users/).
 
+Open **Manage Central users** from the module Status page to reach Central’s role-protected user administration. Central manages administrator permissions in the app.
+
+## OpenID Connect sign-in
+
+In NS8 **Settings**, enable **OpenID Connect**. Under **Choose an NS8 provider**, select an identity provider and user domain. NS8 registers the application and its callback. For an external provider, choose **Enter an external provider** and use **Advanced manual OIDC settings**.
+
+For manual setup, enter the HTTPS issuer URL, client ID and client secret. Register the callback shown in Settings, `https://<Central hostname>/v1/oidc/callback`.
+
+Central uses the authorization-code flow with S256 PKCE, RS256, `client_secret_basic` and the `openid email` scopes. The provider must advertise and return the `email` and `email_verified` claims. Each user must already have a Central account with the same verified email. Confirm an existing administrator matches before enabling the switch.
+
+With OIDC enabled, Central uses it for browser sign-in instead of local passwords. Keep access to NS8 Settings. If sign-in fails, turn OIDC off there and sign in with the existing local administrator password. Test a fresh sign-in in a separate browser session before closing your current session.
+
+A blank secret keeps the saved secret for the same issuer and client ID. Changing either requires a new secret. Configure a matching client and callback again if the hostname changes on restore.
+
 ## Backup, restore and updates
 
 - An NS8 module backup includes a logical PostgreSQL dump, the Enketo keys and its persistent Redis store. Central keeps submissions and attachments in PostgreSQL in this deployment. The separate Redis cache rebuilds automatically.
