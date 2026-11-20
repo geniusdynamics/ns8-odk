@@ -7,7 +7,7 @@ ${TEST_HOST}    odk.ns8-ci.test
 *** Test Cases ***
 Install ODK Central
     ${output}=    Run On Node    add-module ${IMAGE_URL} 1
-    ${module}=    Evaluate    json.loads($output)["module_id"]    modules=json
+    ${module}=    Evaluate    ast.literal_eval($output)["module_id"]    modules=ast
     Set Suite Variable    ${module_id}    ${module}
 
 Configure the HTTPS route and administrator contact
