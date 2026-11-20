@@ -19,8 +19,10 @@ Configure the HTTPS route and administrator contact
     Should Be Equal    ${config}[sysadmin_email]    admin@${TEST_HOST}
 
 Serve both Central and its API through Traefik
-    ${redirect}=    Run On Node    curl -sS --resolve ${TEST_HOST}:80:127.0.0.1 -o /dev/null -w '%{redirect_url}' http://${TEST_HOST}/
-    Should Be Equal    ${redirect}    https://${TEST_HOST}/
+    Wait Until Keyword Succeeds    3 min    5 sec    Run On Node
+    ...    curl -kfsS --max-time 5 --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/v1/config/public
+    ${headers}=    Run On Node    curl -sS --resolve ${TEST_HOST}:80:127.0.0.1 -o /dev/null -D - http://${TEST_HOST}/
+    Should Match Regexp    ${headers}    (?im)^location: https://${TEST_HOST}/\\s*$
     ${version}=    Run On Node    curl -kfsS --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/version.txt
     Should Match Regexp    ${version}    v[0-9]{4}[.][0-9]+[.][0-9]+
     ${output}=    Run On Node    curl -kfsS --resolve ${TEST_HOST}:443:127.0.0.1 https://${TEST_HOST}/v1/config/public

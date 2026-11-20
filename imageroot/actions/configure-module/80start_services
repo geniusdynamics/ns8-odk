@@ -13,4 +13,5 @@ exec 1>&2
 
 
 systemctl --user enable odk.service
-systemctl --user restart odk.service
+systemctl --user restart odk.service postgresql-app.service redis-main-app.service \
+    redis-cache-app.service pyxform-app.service enketo-app.service central-app.service nginx-app.service
