@@ -13,9 +13,9 @@
     }
   ],
   "docs": {
-    "documentation_url": "https://github.com/geniusdynamics/odk#readme",
-    "bug_url": "https://github.com/geniusdynamics/odk/issues",
-    "code_url": "https://github.com/geniusdynamics/odk"
+    "documentation_url": "https://github.com/geniusdynamics/ns8-odk#readme",
+    "bug_url": "https://github.com/geniusdynamics/ns8-odk/issues",
+    "code_url": "https://github.com/geniusdynamics/ns8-odk"
   },
   "source": "ghcr.io/geniusdynamics/odk"
 }
