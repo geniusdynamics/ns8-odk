@@ -27,7 +27,7 @@ Serve both Central and its API through Traefik
     Evaluate    json.loads($output)    modules=json
 
 Verify supporting services
-    FOR    ${unit}    postgresql    redis-main    redis-cache    pyxform    enketo    central    nginx
+    FOR    ${unit}    IN    postgresql    redis-main    redis-cache    pyxform    enketo    central    nginx
         Run On Node    runagent -m ${module_id} systemctl --user is-active ${unit}-app.service
     END
     ${pong}=    Run On Node    runagent -m ${module_id} podman exec redis-main-app redis-cli ping
