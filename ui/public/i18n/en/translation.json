@@ -40,7 +40,19 @@
     "sysadmin_email": "Administrator email",
     "sysadmin_email_help": "Contact address for this server. Create the first login separately using the CLI.",
     "sysadmin_email_format": "Enter a valid email address",
-    "sysadmin_email_pattern": "Enter a valid email address"
+    "sysadmin_email_pattern": "Enter a valid email address",
+    "oidc_enable": "Enable OpenID Connect",
+    "oidc_behavior": "OIDC replaces Central's local browser sign-in. Verify that an existing Central administrator has a matching, verified email at the provider. You can turn OIDC off from NS8 Settings if sign-in fails.",
+    "oidc_issuer": "Issuer URL",
+    "oidc_client_id": "Client ID",
+    "oidc_client_secret": "Client secret",
+    "oidc_callback": "Callback URL",
+    "oidc_secret_saved": "Leave blank to keep the saved secret for the same issuer and client.",
+    "oidc_issuer_invalid": "Enter an HTTPS issuer URL without credentials, a query, or a fragment.",
+    "oidc_client_id_required": "Enter the client ID.",
+    "oidc_secret_required": "Enter the client secret for this issuer and client.",
+    "oidc_confirm": "I have checked the administrator's email and can access NS8 to recover sign-in.",
+    "oidc_confirmation_required": "Confirm that you can recover administrator access before enabling OIDC."
   },
   "about": {
     "title": "About"
