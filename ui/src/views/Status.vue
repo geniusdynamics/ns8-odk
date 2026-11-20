@@ -71,6 +71,15 @@
             >
               {{ $t("status.configure") }}
             </NsButton>
+            <NsButton
+              v-if="host"
+              kind="ghost"
+              :icon="Launch20"
+              :disabled="loading.getConfiguration"
+              @click="goToAdministration"
+            >
+              {{ $t("status.open_administration") }}
+            </NsButton>
           </template>
         </NsInfoCard>
       </cv-column>
@@ -384,6 +393,9 @@ export default {
     this.listBackupRepositories();
   },
   methods: {
+    goToAdministration() {
+      window.open(`https://${this.host}/users`, "_blank", "noopener");
+    },
     goToWebapp() {
       window.open(`https://${this.host}`, "_blank");
     },

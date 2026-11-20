@@ -22,7 +22,8 @@
     "not_configured": "Not configured",
     "open_webapp": "Open ODK Central",
     "configure": "Configure",
-    "odk_webapp": "ODK Central"
+    "odk_webapp": "ODK Central",
+    "open_administration": "Manage Central users"
   },
   "settings": {
     "title": "Settings",

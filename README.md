@@ -36,6 +36,8 @@ Enter the initial password at the hidden prompt, then sign in at the Central URL
 
 Configure the **NS8 cluster smarthost** for Central's invitation and password-reset email. Use a relay that accepts mail from `no-reply@<Central hostname>`. The CLI can create or reset an administrator password independently of email delivery. See the [ODK user management guide](https://docs.getodk.org/central-users/).
 
+Open **Manage Central users** from the module Status page to reach Central’s role-protected user administration. Central manages administrator permissions in the app.
+
 ## OpenID Connect sign-in
 
 In NS8 **Settings**, enable **OpenID Connect**. Under **Choose an NS8 provider**, select an identity provider and user domain. NS8 registers the application and its callback. For an external provider, choose **Enter an external provider** and use **Advanced manual OIDC settings**.
