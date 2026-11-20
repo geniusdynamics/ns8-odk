@@ -27,7 +27,7 @@ git clone --depth 1 --branch "$central_version" --recurse-submodules --shallow-s
 python3 containers/adapt-central.py "$upstream" "$frontend_version"
 cp containers/start-nginx.sh "$upstream/files/nginx/start-ns8.sh"
 for component in service nginx enketo; do
-    buildah bud --label org.opencontainers.image.source=https://github.com/geniusdynamics/odk \
+    buildah bud --label org.opencontainers.image.source=https://github.com/geniusdynamics/ns8-odk \
         --build-arg "FRONTEND_BUILD_MODE=fetch" --build-arg "FRONTEND_VERSION=$frontend_version" \
         -f "$upstream/$component.dockerfile" -t "$repobase/odk-$component" "$upstream"
 done
@@ -40,7 +40,7 @@ module=$(buildah from scratch)
 buildah add "$module" imageroot /imageroot
 buildah add "$module" ui/dist /ui
 buildah config --entrypoint=/ \
-    --label org.opencontainers.image.source=https://github.com/geniusdynamics/odk \
+    --label org.opencontainers.image.source=https://github.com/geniusdynamics/ns8-odk \
     --label "org.opencontainers.image.version=$central_version" \
     --label org.nethserver.authorizations=traefik@node:routeadm \
     --label org.nethserver.tcp-ports-demand=1 \
