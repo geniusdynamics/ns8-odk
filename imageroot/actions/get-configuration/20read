@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/"bin"))
-from oidc_config import load
+from oidc_config import callback_path, load, providers
 
 
 import agent
@@ -14,12 +14,13 @@ import agent
 host = os.environ.get("TRAEFIK_HOST", "")
 route = agent.get_route(os.environ["MODULE_ID"]) if host else {}
 oidc = load()
-public_oidc = {key: oidc[key] for key in ("issuer", "client_id") if key in oidc}
+public_oidc = {key: oidc[key] for key in ("issuer", "client_id", "mode", "provider", "domain") if key in oidc}
 public_oidc.update(enabled=oidc.get("enabled", False), secret_configured=bool(oidc.get("client_secret")))
-public_oidc["callback_path"] = "/v1/oidc/callback"
+public_oidc["callback_path"] = callback_path(oidc)
 
 json.dump({
     "oidc": public_oidc,
+    "oidc_providers": providers(),
     "host": host,
     "sysadmin_email": os.environ.get("ODK_SYSADMIN_EMAIL", ""),
     "lets_encrypt": route.get("lets_encrypt", False),
